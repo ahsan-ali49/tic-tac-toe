@@ -1,5 +1,7 @@
 const Gameboard = (() => {
   const gameboard = ["", "", "", "", "", "", "", "", ""];
+  let currentPlayer = 0;
+  const players = [];
 
   const render = () => {
     let innerDivs = "";
@@ -7,14 +9,30 @@ const Gameboard = (() => {
       innerDivs += `<div class="box" id=${index}></div>`;
     });
     document.querySelector(".main-container").innerHTML = innerDivs;
+
+    addEventHandler();
   };
 
-  return { render };
+  const addEventHandler = () => {
+    const boxes = document.querySelectorAll(".box");
+    console.log(boxes);
+    boxes.forEach((box) => {
+      box.addEventListener("click", handleEvent);
+    });
+  };
+
+  const handleEvent = (event) => {
+    if (event.target.textContent === "") {
+      event.target.textContent = players[currentPlayer].mark;
+      gameboard[event.target.id] = players[currentPlayer].mark;
+      currentPlayer == 0 ? (currentPlayer = 1) : (currentPlayer = 0);
+    }
+  };
+
+  return { render, players };
 })();
 
 const Game = (() => {
-  const players = [];
-
   const start = () => {
     createPlayer();
     createPlayer();
@@ -25,7 +43,7 @@ const Game = (() => {
     let playerName = prompt("Player Name: ");
     let PlayerMark = prompt("Player Mark: ");
     const player = Player(playerName, PlayerMark);
-    players.push(player);
+    Gameboard.players.push(player);
   };
 
   return { start };
