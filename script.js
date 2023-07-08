@@ -1,7 +1,11 @@
 const Gameboard = (() => {
   const gameboard = ["", "", "", "", "", "", "", "", ""];
+  let players = [];
   let currentPlayer = 0;
-  const players = [];
+  const resultMessage = document.createElement("div");
+  const bodyTag = document.querySelector("body");
+  resultMessage.classList = "resultMessage";
+
   const container = document.querySelector(".main-container");
 
   const render = () => {
@@ -10,7 +14,6 @@ const Gameboard = (() => {
       innerDivs += `<div class="box" id=${index}></div>`;
     });
     container.innerHTML = innerDivs;
-
     addEventHandler();
   };
 
@@ -19,6 +22,19 @@ const Gameboard = (() => {
     boxes.forEach((box) => {
       box.addEventListener("click", handleEvent);
     });
+  };
+
+  const handleEvent = (event) => {
+    if (event.target.textContent === "" && !Game.gameOver) {
+      event.target.textContent = players[currentPlayer].mark;
+      gameboard[event.target.id] = players[currentPlayer].mark;
+
+      if (checkForWin()) {
+        showMessage(`${players[currentPlayer].name} Wins!`);
+        restartGame();
+      }
+      currentPlayer == 0 ? (currentPlayer = 1) : (currentPlayer = 0);
+    }
   };
 
   const checkForWin = () => {
@@ -44,19 +60,32 @@ const Gameboard = (() => {
     return false;
   };
 
-  const handleEvent = (event) => {
-    if (event.target.textContent === "" && !Game.gameOver) {
-      event.target.textContent = players[currentPlayer].mark;
-      gameboard[event.target.id] = players[currentPlayer].mark;
+  const showMessage = (message) => {
+    resultMessage.textContent = message;
+    bodyTag.appendChild(resultMessage);
+  };
 
-      if (checkForWin()) {
-        document.querySelector(
-          "#result"
-        ).textContent = `${players[currentPlayer].name} Wins!`;
-        Game.gameOver = !Game.gameOver;
-      }
-      currentPlayer == 0 ? (currentPlayer = 1) : (currentPlayer = 0);
-    }
+  const restartGame = () => {
+    const restartBtn = document.createElement("button");
+    restartBtn.textContent = "Restart";
+    container.appendChild(restartBtn);
+    Game.gameOver = !Game.gameOver;
+
+    restartBtn.addEventListener("click", () => {
+      container.innerHTML = "";
+      resultMessage.textContent = "";
+      Game.gameOver = false;
+      currentPlayer = 0;
+      gameboard.forEach((value, index) => {
+        gameboard[index] = "";
+      });
+
+      Gameboard.players.pop();
+      Gameboard.players.pop();
+      window.onload = setTimeout(function () {
+        Game.start();
+      }, 15);
+    });
   };
 
   return { render, players };
@@ -74,8 +103,7 @@ const Game = (() => {
   const createPlayer = () => {
     let playerName = prompt("Player Name: ");
     let PlayerMark = prompt("Player Mark: ");
-    const player = Player(playerName, PlayerMark);
-    Gameboard.players.push(player);
+    Gameboard.players.push(Player(playerName, PlayerMark));
   };
 
   return { start, gameOver };
